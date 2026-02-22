@@ -1,7 +1,12 @@
-import { Text } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { Navigation } from './presentation/navigation/Navigation';
 
 const App = () => {
-  return <Text>MoviesApp</Text>;
+  return (
+    <NavigationContainer>
+      <Navigation />
+    </NavigationContainer>
+  );
 };
 
 export default App;
