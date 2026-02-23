@@ -6,4 +6,8 @@ export interface Movie {
   rating: number;
   poster: string;
   backdrop: string;
+  // Detail fields (optional)
+  genres?: string[];
+  runtime?: number;
+  tagline?: string;
 }
