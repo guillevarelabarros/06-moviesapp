@@ -8,21 +8,32 @@ export const useMovie = ( movieId: number ) => {
   const [movie, setMovie] = useState<Movie | null>( null );
   const [cast, setCast] = useState<Cast[]>( [] );
   const [similarMovies, setSimilarMovies] = useState<Movie[]>( [] );
+  const [trailerUrl, setTrailerUrl] = useState<string | null>( null );
   const [isLoading, setIsLoading] = useState( true );
+  const [error, setError] = useState<string | null>( null );
 
-  useEffect( () => {
-    Promise.all( [
-      UseCases.getMovieByIdUseCase( movieDBFetcher, movieId ),
-      UseCases.getMovieCastUseCase( movieDBFetcher, movieId ),
-      UseCases.getSimilarMoviesUseCase( movieDBFetcher, movieId ),
-    ] )
-      .then( ( [movieDetail, castList, similar] ) => {
-        setMovie( movieDetail );
-        setCast( castList );
-        setSimilarMovies( similar );
-      } )
-      .finally( () => setIsLoading( false ) );
-  }, [movieId] );
+  const load = async () => {
+    setError( null );
+    setIsLoading( true );
+    try {
+      const [movieDetail, castList, similar, trailer] = await Promise.all( [
+        UseCases.getMovieByIdUseCase( movieDBFetcher, movieId ),
+        UseCases.getMovieCastUseCase( movieDBFetcher, movieId ),
+        UseCases.getSimilarMoviesUseCase( movieDBFetcher, movieId ),
+        UseCases.getMovieTrailerUseCase( movieDBFetcher, movieId ),
+      ] );
+      setMovie( movieDetail );
+      setCast( castList );
+      setSimilarMovies( similar );
+      setTrailerUrl( trailer );
+    } catch {
+      setError( 'No se pudo cargar la película. Verifica tu conexión.' );
+    } finally {
+      setIsLoading( false );
+    }
+  };
 
-  return { movie, cast, similarMovies, isLoading };
+  useEffect( () => { load(); }, [movieId] );
+
+  return { movie, cast, similarMovies, trailerUrl, isLoading, error, retry: load };
 };

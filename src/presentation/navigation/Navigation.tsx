@@ -5,6 +5,8 @@ import { HomeScreen } from '../screens/home/HomeScreen';
 import { DetailsScreen } from '../screens/details/DetailsScreen';
 import { SearchScreen } from '../screens/search/SearchScreen';
 import { FavoritesScreen } from '../screens/favorites/FavoritesScreen';
+import { WatchlistScreen } from '../screens/watchlist/WatchlistScreen';
+import { useTheme } from '../context/ThemeContext';
 
 export type RootStackParams = {
   Tabs: undefined;
@@ -15,18 +17,21 @@ export type TabParams = {
   Home: undefined;
   Search: undefined;
   Favorites: undefined;
+  Watchlist: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParams>();
 const Tab = createBottomTabNavigator<TabParams>();
 
-const TabNavigator = () => (
+const TabNavigator = () => {
+  const { colors } = useTheme();
+  return (
   <Tab.Navigator
     screenOptions={ {
       headerShown: false,
       tabBarActiveTintColor: '#e50914',
       tabBarInactiveTintColor: '#888',
-      tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#eee' },
+      tabBarStyle: { backgroundColor: colors.tabBar, borderTopColor: colors.border },
     } }
   >
     <Tab.Screen
@@ -44,8 +49,14 @@ const TabNavigator = () => (
       component={ FavoritesScreen }
       options={ { tabBarLabel: 'Favoritos', tabBarIcon: ( { color } ) => <Text style={ { fontSize: 20, color } }>❤️</Text> } }
     />
-  </Tab.Navigator>
-);
+    <Tab.Screen
+      name="Watchlist"
+      component={ WatchlistScreen }
+      options={ { tabBarLabel: 'Ver después', tabBarIcon: ( { color } ) => <Text style={ { fontSize: 20, color } }>🕐</Text> } }
+    />
+    </Tab.Navigator>
+  );
+};
 
 export const Navigation = () => {
   return (

@@ -1,6 +1,7 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Movie } from '../../../core/entities/movie.entity';
 import { MoviePoster } from './MoviePoster';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   movies: Movie[];
@@ -9,9 +10,10 @@ interface Props {
 }
 
 export const MoviesHorizontalList = ( { movies, title, onEndReached }: Props ) => {
+  const { colors } = useTheme();
   return (
     <View style={ styles.container }>
-      { title && <Text style={ styles.title }>{ title }</Text> }
+      { title && <Text style={ [styles.title, { color: colors.sectionTitle }] }>{ title }</Text> }
       <FlatList
         data={ movies }
         horizontal
@@ -35,7 +37,6 @@ const styles = StyleSheet.create( {
     fontWeight: 'bold',
     marginLeft: 16,
     marginBottom: 8,
-    color: '#000',
   },
   list: {
     paddingHorizontal: 8,

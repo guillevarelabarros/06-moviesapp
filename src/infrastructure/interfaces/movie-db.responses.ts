@@ -13,6 +13,20 @@ export interface MovieDBMoviesResponse {
   total_results: number;
 }
 
+export interface MovieVideosResponse {
+  id: number;
+  results: MovieVideo[];
+}
+
+export interface MovieVideo {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
 export interface Dates {
   maximum: Date;
   minimum: Date;

@@ -8,6 +8,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFavoritesContext } from '../../context/FavoritesContext';
 import { MoviePoster } from '../../components/movies/MoviePoster';
+import { useTheme } from '../../context/ThemeContext';
 
 const POSTER_WIDTH = ( Dimensions.get( 'window' ).width - 48 ) / 3;
 const POSTER_HEIGHT = POSTER_WIDTH * 1.5;
@@ -15,15 +16,16 @@ const POSTER_HEIGHT = POSTER_WIDTH * 1.5;
 export const FavoritesScreen = () => {
   const { top } = useSafeAreaInsets();
   const { favorites } = useFavoritesContext();
+  const { colors } = useTheme();
 
   return (
-    <View style={ [styles.container, { paddingTop: top + 8 }] }>
-      <Text style={ styles.heading }>Mis favoritos</Text>
+    <View style={ [styles.container, { paddingTop: top + 8, backgroundColor: colors.background }] }>
+      <Text style={ [styles.heading, { color: colors.text }] }>Mis favoritos</Text>
 
       { favorites.length === 0 ? (
         <View style={ styles.empty }>
           <Text style={ styles.emptyIcon }>🎬</Text>
-          <Text style={ styles.emptyText }>No tienes películas favoritas aún</Text>
+          <Text style={ [styles.emptyText, { color: colors.mutedText }] }>No tienes películas favoritas aún</Text>
         </View>
       ) : (
         <FlatList
@@ -44,14 +46,12 @@ export const FavoritesScreen = () => {
 const styles = StyleSheet.create( {
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingHorizontal: 16,
   },
   heading: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#000',
   },
   empty: {
     flex: 1,
@@ -64,7 +64,6 @@ const styles = StyleSheet.create( {
   },
   emptyText: {
     fontSize: 16,
-    color: '#888',
     textAlign: 'center',
   },
   list: {

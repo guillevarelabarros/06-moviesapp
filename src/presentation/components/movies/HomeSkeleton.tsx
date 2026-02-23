@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 const { width } = Dimensions.get( 'window' );
 
-const ShimmerBox = ( { style }: { style?: object } ) => {
+const ShimmerBox = ( { style, bgColor }: { style?: object; bgColor?: string } ) => {
   const opacity = useRef( new Animated.Value( 0.3 ) ).current;
 
   useEffect( () => {
@@ -15,22 +16,23 @@ const ShimmerBox = ( { style }: { style?: object } ) => {
     ).start();
   }, [] );
 
-  return <Animated.View style={ [styles.shimmer, style, { opacity }] } />;
+  return <Animated.View style={ [styles.shimmer, style, { opacity, backgroundColor: bgColor ?? '#ddd' }] } />;
 };
 
 export const HomeSkeleton = () => {
+  const { colors } = useTheme();
   return (
     <ScrollView scrollEnabled={ false }>
       { /* Hero */ }
-      <ShimmerBox style={ { width, height: 340 } } />
+      <ShimmerBox style={ { width, height: 340 } } bgColor={ colors.skeletonBg } />
 
       { /* Four list sections */ }
       { [1, 2, 3, 4].map( section => (
         <View key={ section } style={ styles.section }>
-          <ShimmerBox style={ styles.sectionTitle } />
+          <ShimmerBox style={ styles.sectionTitle } bgColor={ colors.skeletonBg } />
           <View style={ styles.row }>
             { [1, 2, 3, 4].map( i => (
-              <ShimmerBox key={ i } style={ styles.card } />
+              <ShimmerBox key={ i } style={ styles.card } bgColor={ colors.skeletonBg } />
             ) ) }
           </View>
         </View>
@@ -41,7 +43,6 @@ export const HomeSkeleton = () => {
 
 const styles = StyleSheet.create( {
   shimmer: {
-    backgroundColor: '#ddd',
     borderRadius: 8,
   },
   section: {

@@ -1,42 +1,80 @@
 import {
   ActivityIndicator,
   Image,
+  Linking,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { useEffect } from 'react';
 import { StackScreenProps } from '@react-navigation/stack';
 import { RootStackParams } from '../../navigation/Navigation';
 import { useMovie } from '../../hooks/useMovie';
 import { CastHorizontalList } from '../../components/movies/CastHorizontalList';
 import { MoviesHorizontalList } from '../../components/movies/MoviesHorizontalList';
 import { useFavoritesContext } from '../../context/FavoritesContext';
+import { useWatchlistContext } from '../../context/WatchlistContext';
+import { useHistoryContext } from '../../context/HistoryContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props extends StackScreenProps<RootStackParams, 'Details'> {}
 
 export const DetailsScreen = ( { route, navigation }: Props ) => {
   const { movieId } = route.params;
-  const { movie, cast, similarMovies, isLoading } = useMovie( movieId );
+  const { movie, cast, similarMovies, trailerUrl, isLoading, error, retry } = useMovie( movieId );
   const { isFavorite, toggleFavorite } = useFavoritesContext();
+  const { isInWatchlist, toggleWatchlist } = useWatchlistContext();
+  const { addToHistory } = useHistoryContext();
+  const { colors } = useTheme();
   const fav = movie ? isFavorite( movie.id ) : false;
+  const inWatchlist = movie ? isInWatchlist( movie.id ) : false;
+
+  const handleShare = () => {
+    if ( !movie ) return;
+    Share.share( {
+      title: movie.title,
+      message: `¡Mira "${ movie.title }"! https://www.themoviedb.org/movie/${ movie.id }`,
+    } );
+  };
+
+  useEffect( () => {
+    if ( movie ) addToHistory( movie );
+  }, [movie] );
 
   return (
-    <View style={ styles.container }>
+    <View style={ [styles.container, { backgroundColor: colors.background }] }>
       {/* Back button */ }
       <Pressable onPress={ () => navigation.goBack() } style={ styles.backButton }>
         <Text style={ styles.backText }>← Volver</Text>
       </Pressable>
 
       { movie && (
-        <Pressable onPress={ () => toggleFavorite( movie ) } style={ styles.heartButton }>
-          <Text style={ styles.heartText }>{ fav ? '❤️' : '🤍' }</Text>
-        </Pressable>
+        <>
+          <Pressable onPress={ () => toggleFavorite( movie ) } style={ styles.heartButton }>
+            <Text style={ styles.heartText }>{ fav ? '❤️' : '🤍' }</Text>
+          </Pressable>
+          <Pressable onPress={ () => toggleWatchlist( movie ) } style={ styles.watchlistButton }>
+            <Text style={ styles.heartText }>{ inWatchlist ? '🕕' : '🕐' }</Text>
+          </Pressable>
+          <Pressable onPress={ handleShare } style={ styles.shareButton }>
+            <Text style={ styles.heartText }>🔗</Text>
+          </Pressable>
+        </>
       ) }
 
       { isLoading ? (
         <ActivityIndicator size={ 60 } color="red" style={ styles.loader } />
+      ) : error ? (
+        <View style={ styles.errorContainer }>
+          <Text style={ styles.errorIcon }>⚠️</Text>
+          <Text style={ [styles.errorText, { color: colors.text }] }>{ error }</Text>
+          <Pressable style={ styles.retryBtn } onPress={ retry }>
+            <Text style={ styles.retryText }>Reintentar</Text>
+          </Pressable>
+        </View>
       ) : (
         <ScrollView>
           { /* Backdrop */ }
@@ -55,17 +93,25 @@ export const DetailsScreen = ( { route, navigation }: Props ) => {
                 resizeMode="cover"
               />
               <View style={ styles.headerInfo }>
-                <Text style={ styles.title }>{ movie?.title }</Text>
+                <Text style={ [styles.title, { color: colors.text }] }>{ movie?.title }</Text>
                 { movie?.tagline ? (
-                  <Text style={ styles.tagline }>{ movie.tagline }</Text>
+                  <Text style={ [styles.tagline, { color: colors.subtext }] }>{ movie.tagline }</Text>
                 ) : null }
-                <Text style={ styles.rating }>⭐ { movie?.rating.toFixed( 1 ) } / 10</Text>
+                <Text style={ [styles.rating, { color: colors.text }] }>⭐ { movie?.rating.toFixed( 1 ) } / 10</Text>
                 { movie?.runtime ? (
-                  <Text style={ styles.meta }>🕒 { movie.runtime } min</Text>
+                  <Text style={ [styles.meta, { color: colors.subtext }] }>🕒 { movie.runtime } min</Text>
                 ) : null }
-                <Text style={ styles.meta }>
+                <Text style={ [styles.meta, { color: colors.subtext }] }>
                   📅 { movie?.releaseDate.getFullYear() }
                 </Text>
+                { trailerUrl && (
+                  <Pressable
+                    style={ styles.trailerBtn }
+                    onPress={ () => Linking.openURL( trailerUrl ) }
+                  >
+                    <Text style={ styles.trailerText }>▶ Ver tráiler</Text>
+                  </Pressable>
+                ) }
               </View>
             </View>
 
@@ -73,16 +119,16 @@ export const DetailsScreen = ( { route, navigation }: Props ) => {
             { movie?.genres && movie.genres.length > 0 && (
               <View style={ styles.genresContainer }>
                 { movie.genres.map( genre => (
-                  <View key={ genre } style={ styles.genre }>
-                    <Text style={ styles.genreText }>{ genre }</Text>
+                  <View key={ genre } style={ [styles.genre, { backgroundColor: colors.genreBg }] }>
+                    <Text style={ [styles.genreText, { color: colors.genreText }] }>{ genre }</Text>
                   </View>
                 ) ) }
               </View>
             ) }
 
             { /* Description */ }
-            <Text style={ styles.descriptionTitle }>Sinopsis</Text>
-            <Text style={ styles.description }>{ movie?.description }</Text>
+            <Text style={ [styles.descriptionTitle, { color: colors.text }] }>Sinopsis</Text>
+            <Text style={ [styles.description, { color: colors.subtext }] }>{ movie?.description }</Text>
           </View>
 
           { /* Cast */ }
@@ -101,7 +147,6 @@ export const DetailsScreen = ( { route, navigation }: Props ) => {
 const styles = StyleSheet.create( {
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   loader: {
     flex: 1,
@@ -126,6 +171,26 @@ const styles = StyleSheet.create( {
     position: 'absolute',
     top: 40,
     right: 16,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  watchlistButton: {
+    position: 'absolute',
+    top: 40,
+    right: 72,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  shareButton: {
+    position: 'absolute',
+    top: 40,
+    right: 128,
     zIndex: 10,
     backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 12,
@@ -166,21 +231,30 @@ const styles = StyleSheet.create( {
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
   },
   tagline: {
     fontSize: 13,
-    color: '#666',
     fontStyle: 'italic',
   },
   rating: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
   },
   meta: {
     fontSize: 14,
-    color: '#555',
+  },
+  trailerBtn: {
+    backgroundColor: '#e50914',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  trailerText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   genresContainer: {
     flexDirection: 'row',
@@ -189,24 +263,45 @@ const styles = StyleSheet.create( {
     marginBottom: 16,
   },
   genre: {
-    backgroundColor: '#e8e8e8',
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 20,
   },
   genreText: {
     fontSize: 13,
-    color: '#333',
   },
   descriptionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#000',
   },
   description: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#444',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    padding: 32,
+  },
+  errorIcon: {
+    fontSize: 48,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  retryBtn: {
+    backgroundColor: '#e50914',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 } );

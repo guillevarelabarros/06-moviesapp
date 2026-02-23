@@ -1,16 +1,18 @@
 import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { Cast } from '../../../core/entities/cast.entity';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   cast: Cast[];
 }
 
 export const CastHorizontalList = ( { cast }: Props ) => {
+  const { colors } = useTheme();
   if ( cast.length === 0 ) return null;
 
   return (
     <View style={ styles.container }>
-      <Text style={ styles.title }>Reparto</Text>
+      <Text style={ [styles.title, { color: colors.sectionTitle }] }>Reparto</Text>
       <FlatList
         data={ cast }
         horizontal
@@ -26,14 +28,14 @@ export const CastHorizontalList = ( { cast }: Props ) => {
                 resizeMode="cover"
               />
             ) : (
-              <View style={ [styles.avatar, styles.avatarPlaceholder] }>
+              <View style={ [styles.avatar, styles.avatarPlaceholder, { backgroundColor: colors.skeletonBg }] }>
                 <Text style={ styles.avatarInitial }>
                   { item.name.charAt( 0 ) }
                 </Text>
               </View>
             ) }
-            <Text style={ styles.name } numberOfLines={ 2 }>{ item.name }</Text>
-            <Text style={ styles.character } numberOfLines={ 2 }>{ item.character }</Text>
+            <Text style={ [styles.name, { color: colors.castName }] } numberOfLines={ 2 }>{ item.name }</Text>
+            <Text style={ [styles.character, { color: colors.castCharacter }] } numberOfLines={ 2 }>{ item.character }</Text>
           </View>
         ) }
       />
@@ -50,7 +52,6 @@ const styles = StyleSheet.create( {
     fontWeight: 'bold',
     marginLeft: 16,
     marginBottom: 10,
-    color: '#000',
   },
   list: {
     paddingHorizontal: 12,
@@ -67,7 +68,6 @@ const styles = StyleSheet.create( {
     marginBottom: 6,
   },
   avatarPlaceholder: {
-    backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -80,11 +80,9 @@ const styles = StyleSheet.create( {
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
-    color: '#222',
   },
   character: {
     fontSize: 11,
-    color: '#888',
     textAlign: 'center',
   },
 } );
