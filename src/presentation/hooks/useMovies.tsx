@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Movie } from '../../core/entities/movie.entity';
-import { UseCases } from '../../core/use-cases/movies';
+import { moviesNowPlayingUseCase } from '../../core/use-cases';
 import { movieDBFetcher } from '../../config/adapters/http/movieDB.adapter';
 
 export const useMovies = () => {
@@ -9,7 +9,7 @@ export const useMovies = () => {
 
   useEffect(() => {
     const initialLoad = async () => {
-      const nowPlayingMovies = await UseCases.moviesNowPlayingUseCase(movieDBFetcher);
+      const nowPlayingMovies = await moviesNowPlayingUseCase(movieDBFetcher);
       setNowPlaying(nowPlayingMovies);
       setIsLoading(false);
     };
