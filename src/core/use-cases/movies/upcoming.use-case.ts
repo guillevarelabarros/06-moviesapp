@@ -5,9 +5,10 @@ import { Movie } from '../../entities/movie.entity';
 
 export const moviesUpcomingUseCase = async (
   fetcher: HttpAdapter,
+  page: number = 1,
 ): Promise<Movie[]> => {
   try {
-    const upcoming = await fetcher.get<MovieDBMoviesResponse>( '/upcoming' );
+    const upcoming = await fetcher.get<MovieDBMoviesResponse>( '/upcoming', { params: { page } } );
     return upcoming.results.map( result =>
       MovieMapper.fromMovieDBResultToEntity( result ),
     );

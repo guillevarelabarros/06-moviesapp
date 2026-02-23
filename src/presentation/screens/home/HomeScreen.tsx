@@ -1,26 +1,26 @@
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useMovies } from '../../hooks/useMovies';
 import { MoviesHorizontalList } from '../../components/movies/MoviesHorizontalList';
 import { HeroBanner } from '../../components/movies/HeroBanner';
+import { HomeSkeleton } from '../../components/movies/HomeSkeleton';
 
 export const HomeScreen = () => {
-  const { nowPlaying, popular, topRated, upcoming, isLoading } = useMovies();
+  const {
+    nowPlaying, popular, topRated, upcoming, isLoading,
+    fetchNextNowPlaying, fetchNextPopular, fetchNextTopRated, fetchNextUpcoming,
+  } = useMovies();
 
   if ( isLoading ) {
-    return (
-      <View style={ styles.loader }>
-        <ActivityIndicator size={ 60 } color="red" />
-      </View>
-    );
+    return <HomeSkeleton />;
   }
 
   return (
     <ScrollView>
       { nowPlaying[0] && <HeroBanner movie={ nowPlaying[0] } /> }
-      <MoviesHorizontalList movies={ nowPlaying } title="En cines" />
-      <MoviesHorizontalList movies={ popular } title="Populares" />
-      <MoviesHorizontalList movies={ topRated } title="Mejor valoradas" />
-      <MoviesHorizontalList movies={ upcoming } title="Próximamente" />
+      <MoviesHorizontalList movies={ nowPlaying } title="En cines" onEndReached={ fetchNextNowPlaying } />
+      <MoviesHorizontalList movies={ popular } title="Populares" onEndReached={ fetchNextPopular } />
+      <MoviesHorizontalList movies={ topRated } title="Mejor valoradas" onEndReached={ fetchNextTopRated } />
+      <MoviesHorizontalList movies={ upcoming } title="Próximamente" onEndReached={ fetchNextUpcoming } />
     </ScrollView>
   );
 };

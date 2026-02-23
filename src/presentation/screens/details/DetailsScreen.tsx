@@ -12,12 +12,15 @@ import { RootStackParams } from '../../navigation/Navigation';
 import { useMovie } from '../../hooks/useMovie';
 import { CastHorizontalList } from '../../components/movies/CastHorizontalList';
 import { MoviesHorizontalList } from '../../components/movies/MoviesHorizontalList';
+import { useFavoritesContext } from '../../context/FavoritesContext';
 
 interface Props extends StackScreenProps<RootStackParams, 'Details'> {}
 
 export const DetailsScreen = ( { route, navigation }: Props ) => {
   const { movieId } = route.params;
   const { movie, cast, similarMovies, isLoading } = useMovie( movieId );
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
+  const fav = movie ? isFavorite( movie.id ) : false;
 
   return (
     <View style={ styles.container }>
@@ -25,6 +28,12 @@ export const DetailsScreen = ( { route, navigation }: Props ) => {
       <Pressable onPress={ () => navigation.goBack() } style={ styles.backButton }>
         <Text style={ styles.backText }>← Volver</Text>
       </Pressable>
+
+      { movie && (
+        <Pressable onPress={ () => toggleFavorite( movie ) } style={ styles.heartButton }>
+          <Text style={ styles.heartText }>{ fav ? '❤️' : '🤍' }</Text>
+        </Pressable>
+      ) }
 
       { isLoading ? (
         <ActivityIndicator size={ 60 } color="red" style={ styles.loader } />
@@ -112,6 +121,19 @@ const styles = StyleSheet.create( {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  heartButton: {
+    position: 'absolute',
+    top: 40,
+    right: 16,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  heartText: {
+    fontSize: 20,
   },
   backdrop: {
     width: '100%',

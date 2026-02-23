@@ -1,8 +1,9 @@
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Movie } from '../../../core/entities/movie.entity';
 import { RootStackParams } from '../../navigation/Navigation';
+import { useFavoritesContext } from '../../context/FavoritesContext';
 
 interface Props {
   movie: Movie;
@@ -12,6 +13,8 @@ interface Props {
 
 export const MoviePoster = ({ movie, height = 300, width = 200 }: Props) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParams>>();
+  const { isFavorite, toggleFavorite } = useFavoritesContext();
+  const fav = isFavorite( movie.id );
 
   return (
     <Pressable
@@ -24,6 +27,13 @@ export const MoviePoster = ({ movie, height = 300, width = 200 }: Props) => {
           style={ styles.image }
           resizeMode="cover"
         />
+        <Pressable
+          style={ styles.heartBtn }
+          onPress={ () => toggleFavorite( movie ) }
+          hitSlop={ 8 }
+        >
+          <Text style={ styles.heart }>{ fav ? '❤️' : '🤍' }</Text>
+        </Pressable>
       </View>
     </Pressable>
   );
@@ -46,5 +56,16 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     borderRadius: 18,
+  },
+  heartBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 20,
+    padding: 4,
+  },
+  heart: {
+    fontSize: 18,
   },
 });

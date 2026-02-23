@@ -5,9 +5,10 @@ import { MoviePoster } from './MoviePoster';
 interface Props {
   movies: Movie[];
   title?: string;
+  onEndReached?: () => void;
 }
 
-export const MoviesHorizontalList = ( { movies, title }: Props ) => {
+export const MoviesHorizontalList = ( { movies, title, onEndReached }: Props ) => {
   return (
     <View style={ styles.container }>
       { title && <Text style={ styles.title }>{ title }</Text> }
@@ -17,6 +18,8 @@ export const MoviesHorizontalList = ( { movies, title }: Props ) => {
         keyExtractor={ item => item.id.toString() }
         showsHorizontalScrollIndicator={ false }
         contentContainerStyle={ styles.list }
+        onEndReached={ onEndReached }
+        onEndReachedThreshold={ 0.6 }
         renderItem={ ( { item } ) => <MoviePoster movie={ item } /> }
       />
     </View>
